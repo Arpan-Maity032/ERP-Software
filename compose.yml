@@ -64,7 +64,7 @@ services:
     networks: [backend]
 
   gateway:
-    image: nginx:1.28-alpine
+    build: ./gateway
     restart: unless-stopped
     ports:
       - "8080:80"

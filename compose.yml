@@ -16,7 +16,7 @@ services:
     networks: [backend]
   
   user_service:
-    build: ./services
+    build: ./services/user_global_service
     restart: unless-stopped
     environment:
       SERVICE_NAME: users
@@ -32,7 +32,7 @@ services:
     networks: [backend]
 
   master_service:
-    build: ./services
+    build: ./services/master-global-service
     restart: unless-stopped
     environment:
       SERVICE_NAME: master
@@ -48,7 +48,7 @@ services:
     networks: [backend]
 
   store_service:
-    build: ./services
+    build: ./services/store-inventory-service
     restart: unless-stopped
     environment:
       SERVICE_NAME: store

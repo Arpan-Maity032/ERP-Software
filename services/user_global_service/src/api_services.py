@@ -6,13 +6,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-# Import DB setup and SQLAlchemy models
-from database_schema_2 import (
+# Corrected imports to match standard filenames
+from database_schema import (
     SessionLocal, UserMaster, RoleMaster, PermissionMaster, 
     UserRole, RolePermission, AbacPolicy
 )
-
-# Import Pydantic schemas
 from data_validation import (
     UserCreate, UserResponse, RoleCreate, RoleResponse,
     PermissionCreate, PermissionResponse, AbacPolicyCreate, AbacPolicyResponse,
@@ -27,9 +25,6 @@ if not JWT_SECRET:
 ALGORITHM = "HS256"
 router = APIRouter()
 
-# ==========================================
-# DEPENDENCIES (DB & AUTH)
-# ==========================================
 def get_db():
     db = SessionLocal()
     try:
@@ -65,14 +60,9 @@ def require_admin(user: dict = Depends(current_user)) -> dict:
         raise HTTPException(status_code=403, detail="Admin role required")
     return user
 
-# ==========================================
-# USER MANAGEMENT ENDPOINTS
-# ==========================================
 @router.post("/api/v1/users", response_model=UserResponse, status_code=201)
 def create_user(data: UserCreate, user: dict = Depends(require_admin), db: Session = Depends(get_db)):
     user_data = data.model_dump(exclude={"password"})
-    
-    # In a real app, hash the password using passlib/bcrypt here
     user_data["password_hash"] = f"hashed_{data.password}" 
     user_data["created_by"] = user["email"]
     user_data["created_at"] = datetime.now(timezone.utc).replace(tzinfo=None)
@@ -95,9 +85,6 @@ def list_users(user: dict = Depends(require_admin), db: Session = Depends(get_db
     stmt = select(UserMaster).limit(limit).offset(offset)
     return db.scalars(stmt).all()
 
-# ==========================================
-# ROLE MANAGEMENT ENDPOINTS
-# ==========================================
 @router.post("/api/v1/roles", response_model=RoleResponse, status_code=201)
 def create_role(data: RoleCreate, user: dict = Depends(require_admin), db: Session = Depends(get_db)):
     role_data = data.model_dump()
@@ -122,9 +109,6 @@ def list_roles(user: dict = Depends(require_admin), db: Session = Depends(get_db
     stmt = select(RoleMaster)
     return db.scalars(stmt).all()
 
-# ==========================================
-# PERMISSION MANAGEMENT ENDPOINTS
-# ==========================================
 @router.post("/api/v1/permissions", response_model=PermissionResponse, status_code=201)
 def create_permission(data: PermissionCreate, user: dict = Depends(require_admin), db: Session = Depends(get_db)):
     perm_data = data.model_dump()
@@ -144,9 +128,6 @@ def create_permission(data: PermissionCreate, user: dict = Depends(require_admin
         db.rollback()
         raise HTTPException(status_code=500, detail="Database error while creating permission")
 
-# ==========================================
-# ASSIGNMENT ENDPOINTS (User->Role & Role->Perm)
-# ==========================================
 @router.post("/api/v1/users/{user_id}/roles", status_code=201)
 def assign_role_to_user(user_id: int, data: UserRoleAssign, admin: dict = Depends(require_admin), db: Session = Depends(get_db)):
     if user_id != data.user_id:
@@ -167,9 +148,6 @@ def assign_role_to_user(user_id: int, data: UserRoleAssign, admin: dict = Depend
         db.rollback()
         raise HTTPException(status_code=409, detail="User already has this role or invalid IDs")
 
-# ==========================================
-# ABAC POLICY ENDPOINTS
-# ==========================================
 @router.post("/api/v1/policies", response_model=AbacPolicyResponse, status_code=201)
 def create_policy(data: AbacPolicyCreate, user: dict = Depends(require_admin), db: Session = Depends(get_db)):
     policy_data = data.model_dump()

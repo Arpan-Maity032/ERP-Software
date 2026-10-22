@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 
-# Import configuration and models from the updated database schema
-from database_schema_3 import (
+# Corrected imports to match standard filenames
+from database_schema import (
     Base, 
     engine, 
     DB_NAME, 
@@ -15,14 +15,12 @@ from database_schema_3 import (
     AbacPolicy
 )
 
-# Import router and service configuration
 from api_services import router, SERVICE
 
 app = FastAPI(
     title=f"{SERVICE.title()} API",
     version="1.0.0"
 )
-
 
 @app.on_event("startup")
 def startup():
@@ -51,7 +49,6 @@ def startup():
             ]
         )
 
-
 @app.get("/health")
 def health():
     """
@@ -73,7 +70,6 @@ def health():
             detail="Database unavailable"
         )
 
-
 @app.get("/")
 def root():
     return {
@@ -81,6 +77,5 @@ def root():
         "docs": "/docs",
         "health": "/health"
     }
-
 
 app.include_router(router)

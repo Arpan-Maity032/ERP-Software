@@ -15,21 +15,21 @@ services:
       start_period: 20s
     networks: [backend]
   
-  # user_service:
-  #   build: ./services/user_global_service
-  #   restart: unless-stopped
-  #   environment:
-  #     SERVICE_NAME: users
-  #     PORT: 8000
-  #     DB_HOST: mysql
-  #     DB_NAME: USER_DB
-  #     DB_USER: user_app
-  #     DB_PASSWORD: ${USER_DB_PASSWORD}
-  #     JWT_SECRET: ${JWT_SECRET}
-  #     ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-30}
-  #   depends_on:
-  #     mysql: { condition: service_healthy }
-  #   networks: [backend]
+  user_service:
+    build: ./services/user_global_service
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: users
+      PORT: 8000
+      DB_HOST: mysql
+      DB_NAME: USER_DB
+      DB_USER: user_app
+      DB_PASSWORD: ${USER_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-30}
+    depends_on:
+      mysql: { condition: service_healthy }
+    networks: [backend]
 
   master_service:
     build: ./services/master-global-service
